@@ -3,7 +3,6 @@
   "name": "weekly plan",
   "version": "1.0",
   "description": "Add the weekly plan to Chrome Extension",
-
   "icons": {
     "16": "images/icon-16.png",
     "32": "images/icon-32.png",
@@ -20,5 +19,5 @@
     }
   ],
   "permissions": ["cookies"],
-  "host_permissions": ["https://schools.madrasati.sa/"]
+  "host_permissions": ["https://*.madrasati.sa/"]
 }

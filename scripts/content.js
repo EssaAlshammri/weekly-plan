@@ -1,10 +1,11 @@
-{
-  /* <button class="btn btn-primary">
-  تجميع الخطة الاسبوعية <i class="fa-regular fa-calendar-days"></i>
-</button>; */
-}
+console.log("content.js loaded");
 
-console.log("content.js loaded outside");
+// Example to test if chrome.runtime is accessible
+if (chrome && chrome.runtime) {
+  console.log("chrome.runtime is available");
+} else {
+  console.error("chrome.runtime is not available");
+}
 
 var buttonPosition = document.querySelector(".ibox.fadeInRight");
 if (buttonPosition) {
@@ -21,24 +22,24 @@ if (buttonPosition) {
   buttonPosition.insertAdjacentElement("afterend", createPlanBtn);
 }
 
-function getWeeklyPlan() {
-  const schoolId = getSchoolIdFromCookies();
-  console.log(schoolId, "heloooooooooooo");
-}
-
-function getCurrentUrl() {
-  return window.location.href;
+async function getWeeklyPlan() {
+  try {
+    const schoolId = await getSchoolIdFromCookies();
+  } catch (error) {
+    console.error("Error retrieving school ID:", error);
+  }
 }
 
 function getSchoolIdFromCookies() {
-  console.log("getting school id from cookies");
-  let sid;
-  chrome.runtime.sendMessage({ action: "getCookie" }, function (response) {
-    if (response.value) {
-      console.log(response.value);
-      sid = response.value;
-    }
+  return new Promise((resolve, reject) => {
+    console.log("getting school id from cookies");
+    chrome.runtime.sendMessage({ action: "getCookie" }, function (response) {
+      if (response.value) {
+        console.log(response.value);
+        resolve(response.value); // Resolve the promise with the retrieved value
+      } else {
+        resolve(null); // Resolve the promise with null if the cookie is not found
+      }
+    });
   });
-
-  return sid;
 }
