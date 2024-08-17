@@ -1,0 +1,24 @@
+{
+  "manifest_version": 3,
+  "name": "weekly plan",
+  "version": "1.0",
+  "description": "Add the weekly plan to Chrome Extension",
+
+  "icons": {
+    "16": "images/icon-16.png",
+    "32": "images/icon-32.png",
+    "48": "images/icon-48.png",
+    "128": "images/icon-128.png"
+  },
+  "background": {
+    "service_worker": "scripts/background.js"
+  },
+  "content_scripts": [
+    {
+      "js": ["scripts/content.js"],
+      "matches": ["https://schools.madrasati.sa/SchoolManagment/*"]
+    }
+  ],
+  "permissions": ["cookies"],
+  "host_permissions": ["https://schools.madrasati.sa/"]
+}
