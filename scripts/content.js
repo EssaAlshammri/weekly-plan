@@ -6,7 +6,7 @@ if (chrome && chrome.runtime) {
   console.error("chrome.runtime is not available");
 }
 
-var buttonPosition = document.querySelector(".ibox.fadeInRight");
+var buttonPosition = document.querySelector(".page-title");
 if (buttonPosition) {
   var createPlanBtn = document.createElement("button");
 
