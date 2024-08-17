@@ -8,6 +8,7 @@ if (chrome && chrome.runtime) {
 
 var buttonPosition = document.querySelector(".page-title");
 if (buttonPosition) {
+  console.log("Button position found, inserting createPlanBtn...");
   var createPlanBtn = document.createElement("button");
 
   createPlanBtn.innerHTML =
@@ -15,6 +16,7 @@ if (buttonPosition) {
   createPlanBtn.className = "btn btn-primary";
 
   createPlanBtn.onclick = function () {
+    console.log("createPlanBtn clicked, initiating getWeeklyPlan...");
     getWeeklyPlan();
 
     createPlanBtn.innerHTML = "يرجى الانتظار";
@@ -22,14 +24,23 @@ if (buttonPosition) {
   };
 
   buttonPosition.insertAdjacentElement("afterend", createPlanBtn);
+} else {
+  console.warn("Button position not found, createPlanBtn not inserted.");
 }
 
 async function getWeeklyPlan() {
   try {
+    console.log("getWeeklyPlan started...");
     const schoolId = await getSchoolIdFromCookies();
+    console.log("School ID retrieved:", schoolId);
+    if (!schoolId) {
+      console.error("No school ID found.");
+      return;
+    }
     const teachersIds = await getAllTeachersIds(schoolId);
+    console.log("Teachers IDs retrieved:", teachersIds);
   } catch (error) {
-    console.error("Error retrieving school ID:", error);
+    console.error("Error in getWeeklyPlan:", error);
   }
 }
 
@@ -39,9 +50,12 @@ async function getAllTeachersIds(schoolId, page = 1) {
     teachersPageUrl += `&PageNumber=${page}`;
   }
 
+  console.log(`Fetching teachers data from page ${page}...`, teachersPageUrl);
+
   try {
     const response = await fetch(teachersPageUrl);
     const data = await response.text();
+    console.log("Teachers page data retrieved for page", page);
 
     const parser = new DOMParser();
     const teachersDoc = parser.parseFromString(data, "text/html");
@@ -56,6 +70,8 @@ async function getAllTeachersIds(schoolId, page = 1) {
       return urlParams.get("Teacherid");
     });
 
+    console.log("Teacher IDs extracted from page", page, teacherIds);
+
     const paginationInfo = teachersDoc.querySelector(".pagination-page-info");
     let maxPage = 1;
     if (paginationInfo) {
@@ -67,25 +83,28 @@ async function getAllTeachersIds(schoolId, page = 1) {
     }
 
     if (page < maxPage) {
+      console.log(`Page ${page} completed. Fetching next page...`);
       const nextPageIds = await getAllTeachersIds(schoolId, page + 1);
       return [...teacherIds, ...nextPageIds];
     }
 
+    console.log("All pages fetched. Returning teacher IDs...");
     return teacherIds;
   } catch (error) {
-    console.error("Error:", error);
+    console.error("Error fetching teacher data:", error);
     return [];
   }
 }
 
 function getSchoolIdFromCookies() {
   return new Promise((resolve, reject) => {
-    console.log("getting school id from cookies");
+    console.log("Requesting school ID from cookies...");
     chrome.runtime.sendMessage({ action: "getCookie" }, function (response) {
       if (response.value) {
-        console.log(response.value);
+        console.log("School ID retrieved from cookies:", response.value);
         resolve(response.value);
       } else {
+        console.warn("No school ID found in cookies.");
         resolve(null);
       }
     });
@@ -104,7 +123,7 @@ function getSundayDate(today = new Date()) {
 
   targetSunday.setHours(6, 0, 0, 0);
 
-  return targetSunday.toLocaleString("en-SA", {
+  const formattedDate = targetSunday.toLocaleString("en-SA", {
     month: "numeric",
     day: "numeric",
     year: "numeric",
@@ -113,4 +132,7 @@ function getSundayDate(today = new Date()) {
     second: "2-digit",
     hour12: true,
   });
+
+  console.log("Calculated Sunday date:", formattedDate);
+  return formattedDate;
 }
