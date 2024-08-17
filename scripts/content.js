@@ -91,3 +91,26 @@ function getSchoolIdFromCookies() {
     });
   });
 }
+
+function getSundayDate(today = new Date()) {
+  const dayOfWeek = today.getDay();
+  let targetSunday = new Date(today);
+
+  if (dayOfWeek >= 0 && dayOfWeek <= 4) {
+    targetSunday.setDate(today.getDate() - dayOfWeek);
+  } else {
+    targetSunday.setDate(today.getDate() + (7 - dayOfWeek));
+  }
+
+  targetSunday.setHours(6, 0, 0, 0);
+
+  return targetSunday.toLocaleString("en-SA", {
+    month: "numeric",
+    day: "numeric",
+    year: "numeric",
+    hour: "numeric",
+    minute: "2-digit",
+    second: "2-digit",
+    hour12: true,
+  });
+}
