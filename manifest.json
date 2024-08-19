@@ -18,6 +18,12 @@
       "matches": ["https://schools.madrasati.sa/SchoolManagment/*"]
     }
   ],
-  "permissions": ["cookies"],
-  "host_permissions": ["https://*.madrasati.sa/"]
+  "permissions": ["cookies", "tabs"],
+  "host_permissions": ["https://*.madrasati.sa/"],
+  "web_accessible_resources": [
+    {
+      "resources": ["weekly_plan.html"],
+      "matches": ["<all_urls>"]
+    }
+  ]
 }

@@ -47,6 +47,12 @@ async function getWeeklyPlan() {
       schoolId
     );
     console.log(teachersTimeTables);
+
+    // Open a new tab with the weekly plan data
+    chrome.runtime.sendMessage({
+      action: "openWeeklyPlanTab",
+      teachersTimeTables: teachersTimeTables,
+    });
   } catch (error) {
     console.error("Error in getWeeklyPlan:", error);
   }
