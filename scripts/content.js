@@ -7,7 +7,7 @@ if (chrome && chrome.runtime) {
 }
 
 var buttonPosition = document.querySelector(".page-title");
-const csrfTokenW = document.getElementById("csrfid").value
+const csrfTokenW = document.getElementById("csrfid").value;
 if (buttonPosition) {
   console.log("Button position found, inserting createPlanBtn...");
   var createPlanBtn = document.createElement("button");
@@ -41,8 +41,12 @@ async function getWeeklyPlan() {
     const teachersIds = await getAllTeachersIds(schoolId);
     console.log("Teachers IDs retrieved:", teachersIds);
     const sundayDate = getSundayDate();
-    const teachersTimeTables = await getAllTeachersTimeTables(teachersIds, sundayDate, schoolId)
-    console.log(teachersTimeTables)
+    const teachersTimeTables = await getAllTeachersTimeTables(
+      teachersIds,
+      sundayDate,
+      schoolId
+    );
+    console.log(teachersTimeTables);
   } catch (error) {
     console.error("Error in getWeeklyPlan:", error);
   }
@@ -142,26 +146,35 @@ function getSundayDate(today = new Date()) {
 }
 
 async function getAllTeachersTimeTables(teacherIds, sundayDate, schoolId) {
+  const teachersTimeTables = {};
   for (const teacherId of teacherIds) {
-    try {
-
-      let response = await fetch("https://schools.madrasati.sa/SchoolManagment/Lessons/GetCal", {
-        headers: {
-          "content-type": "application/json; charset=utf-8",
-          requestverificationtoken: csrfTokenW
-        },
-        body: JSON.stringify({ Date: sundayDate, index: 0, schoolId: schoolId, TechearId: teacherId }),
-        method: "POST",
-        mode: "cors",
-        credentials: "include"
-      });
-      let data = await response.json();
-      console.log(data)
-    } catch (error) {
-      console.log(error)
-      return []
+    teachersTimeTables[teacherId] = {};
+    for (let dayIndex = 0; dayIndex < 6; dayIndex++) {
+      try {
+        let response = await fetch(
+          "https://schools.madrasati.sa/SchoolManagment/Lessons/GetCal",
+          {
+            headers: {
+              "content-type": "application/json; charset=utf-8",
+              requestverificationtoken: csrfTokenW,
+            },
+            body: JSON.stringify({
+              Date: sundayDate,
+              index: dayIndex,
+              schoolId: schoolId,
+              TechearId: teacherId,
+            }),
+            method: "POST",
+            mode: "cors",
+            credentials: "include",
+          }
+        );
+        let data = await response.json();
+        teachersTimeTables[teacherId][dayIndex] = data;
+      } catch (error) {
+        console.log(error);
+      }
     }
-
   }
-  return 1
+  return teachersTimeTables;
 }
