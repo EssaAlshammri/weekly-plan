@@ -2,9 +2,9 @@ document.addEventListener("DOMContentLoaded", function () {
   chrome.runtime.sendMessage(
     { action: "getWeeklyPlanData" },
     function (response) {
-      if (response && response.teachersTimeTables) {
-        console.log("Weekly plan data received:", response.teachersTimeTables);
-        displayWeeklyPlan(response.teachersTimeTables);
+      if (response && response.result) {
+        console.log("Weekly plan data received:", response.result);
+        // displayWeeklyPlan(response.result);
       } else {
         document.getElementById("plan-content").innerHTML =
           "No data available.";
@@ -13,13 +13,13 @@ document.addEventListener("DOMContentLoaded", function () {
   );
 });
 
-function displayWeeklyPlan(teachersTimeTables) {
+function displayWeeklyPlan(result) {
   let html = "<table>";
   html += "<tr><th>Teacher ID</th><th>Day</th><th>Lessons</th></tr>";
 
-  for (let teacherId in teachersTimeTables) {
-    for (let dayIndex in teachersTimeTables[teacherId]) {
-      let lessons = teachersTimeTables[teacherId][dayIndex];
+  for (let teacherId in result) {
+    for (let dayIndex in result[teacherId]) {
+      let lessons = result[teacherId][dayIndex];
       html += `<tr>
                 <td>${teacherId}</td>
                 <td>${getDayName(dayIndex)}</td>

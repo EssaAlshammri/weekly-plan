@@ -48,24 +48,54 @@ async function getWeeklyPlan() {
     );
 
     const addedPeriods = await getAddedPeriodsOnly(teachersTimeTables);
-    const cleanedTimeTable = await keepOneLesson(addedPeriods);
-    const timeTableSubjectsOnly = getTimeTableSubjectsOnly(cleanedTimeTable);
+    const timeTableSubjectsOnly = getTimeTableSubjectsOnly(addedPeriods);
 
     const TimeTable = addTimetableEntries(
       subjectsMapping,
       timeTableSubjectsOnly
     );
-    console.log(sundayDate);
+    const weekDates = getWeekDates(sundayDate);
     await getTimeTableDetails(TimeTable);
-    console.log(TimeTable);
+    const finalTimeTable = combineLessonContent(TimeTable);
+
+    console.log("getWeeklyPlan completed.");
+
+    const result = {
+      weekDates: weekDates,
+      finalTimeTable: finalTimeTable,
+    };
 
     chrome.runtime.sendMessage({
       action: "openWeeklyPlanTab",
-      teachersTimeTables: teachersTimeTables,
+      result: result,
     });
+    createPlanBtn.innerHTML =
+      "تجميع الخطة الاسبوعية <i class='fa-regular fa-calendar-days'></i>";
+    createPlanBtn.className = "btn btn-primary";
   } catch (error) {
     console.error("Error in getWeeklyPlan:", error);
   }
+}
+
+function formatDate(date) {
+  let day = date.getDate().toString().padStart(2, "0");
+  let month = (date.getMonth() + 1).toString().padStart(2, "0");
+  let year = date.getFullYear();
+  return `${day}/${month}/${year}`;
+}
+
+function getWeekDates(inputDateStr) {
+  let inputDate = new Date(inputDateStr);
+
+  let datesList = [];
+
+  for (let i = 0; i < 5; i++) {
+    datesList.push(formatDate(new Date(inputDate)));
+
+    inputDate.setDate(inputDate.getDate() + 1);
+  }
+
+  return datesList;
 }
 
 async function getLessonAndGoalsIds(data) {
@@ -137,6 +167,59 @@ async function getGoalsText(lessonAndGoalsIds) {
   }
 }
 
+async function getHomeworks(data) {
+  const parser = new DOMParser();
+  const periodDoc = parser.parseFromString(data, "text/html");
+  const homeworksLinksElements = periodDoc.querySelectorAll(
+    'a[href^="/Teacher/Assignments/ViewAssignment/"]'
+  );
+  if (homeworksLinksElements.length > 0) {
+    return true;
+  }
+  return false;
+}
+
+function combineLessonContent(data) {
+  const result = {
+    firstGrade: [],
+    secondGrade: [],
+    thirdGrade: [],
+  };
+
+  for (const grade of ["firstGrade", "secondGrade", "thirdGrade"]) {
+    const subjects = data[grade];
+    for (const subject of subjects) {
+      const { timetableEntries } = subject;
+      const uniqueEntries = new Map();
+
+      for (const entry of timetableEntries) {
+        const { LessonContentId, title } = entry;
+        const key = `${LessonContentId}-${title}`;
+
+        if (!uniqueEntries.has(key)) {
+          uniqueEntries.set(key, {
+            ...entry,
+            goals: [],
+            homeworks: false,
+          });
+        }
+
+        const existingEntry = uniqueEntries.get(key);
+        existingEntry.goals = [
+          ...new Set([...existingEntry.goals, ...entry.processedResult.goals]),
+        ];
+        existingEntry.homeworks =
+          existingEntry.homeworks || entry.processedResult.homeworks;
+      }
+
+      subject.timetableEntries = Array.from(uniqueEntries.values());
+      result[grade].push(subject);
+    }
+  }
+
+  return result;
+}
+
 async function processTimetableEntries(entry) {
   const result = {};
   try {
@@ -146,11 +229,10 @@ async function processTimetableEntries(entry) {
     const data = await response.text();
     const lessonAndGoalsIds = await getLessonAndGoalsIds(data);
     const goalsText = await getGoalsText(lessonAndGoalsIds);
-    // const parser = new DOMParser();
-    // const periodDoc = parser.parseFromString(data, "text/html");
-    // const goals = periodDoc.querySelectorAll('label[for^="goal_"]');
+    const homeworks = await getHomeworks(data);
 
     result["goals"] = goalsText;
+    result["homeworks"] = homeworks;
   } catch (error) {
     console.log(error);
   }
@@ -472,6 +554,7 @@ function addTimetableEntries(grades, timetable) {
             subjectId: entry["SubjectId"],
             data: entry["Data"],
             title: entry["Title"],
+            LessonContentId: entry["LessonContentId"],
           });
         }
       });

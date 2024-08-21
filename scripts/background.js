@@ -14,10 +14,10 @@ chrome.runtime.onMessage.addListener(function (request, sender, sendResponse) {
     );
     return true;
   } else if (request.action === "openWeeklyPlanTab") {
-    weeklyPlanData = request.teachersTimeTables;
+    weeklyPlanData = request.result;
     chrome.tabs.create({ url: chrome.runtime.getURL("weekly_plan.html") });
   } else if (request.action === "getWeeklyPlanData") {
-    sendResponse({ teachersTimeTables: weeklyPlanData });
+    sendResponse({ result: weeklyPlanData });
     weeklyPlanData = null; // Clear the data after sending
   }
 });
