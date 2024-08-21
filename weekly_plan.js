@@ -31,7 +31,7 @@ function displayWeeklyPlan(result) {
     }
     for (const subject of subjects) {
       html += `<tr> <td class="border bg-[#b3a48c] text-white text-center text-wrap w-20">${subject["subjectName"]}</td>`;
-      html += `<td class="border" colspan="5"><p dir=${
+      html += `<td class="border border-white bg-[#e8e8e8]" colspan="5"><p dir=${
         subject["subjectName"] === "Super Goal" ? "ltr" : "rtl"
       }> <span class="text-red-500">${
         subject["subjectName"] === "Super Goal" ? "Subjects" : "الموضوع"
@@ -57,7 +57,7 @@ function displayWeeklyPlan(result) {
       }
       html += `</p></td> </tr>`;
       html += `<tr> <td class="border bg-[#2ca2a2] text-white text-center">الواجبات المنزلية</td>`;
-      html += `<td class="border" colspan="5"> `;
+      html += `<td class="border border-white bg-[#e8e8e8]" colspan="5"> `;
       let homeworksCounter = 0;
       for (const timetableEntries of subject["timetableEntries"]) {
         if (timetableEntries["homeworks"] === true) {
