@@ -105,6 +105,7 @@ async function getGoalsText(lessonAndGoalsIds) {
       LectureClassId: lessonAndGoalsIds["LectureClassId"],
       CopyMode: "False",
       lessonId: lessonAndGoalsIds["lessonId"],
+      "LessonGoalsAndActivity[0][lesssonId]": lessonAndGoalsIds["lessonId"],
     });
     for (const id of lessonAndGoalsIds["goalsIds"]) {
       formData.append("LessonGoalsAndActivity[0][goalsIds][]", id);
