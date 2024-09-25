@@ -259,7 +259,7 @@ async function getTimeTableDetails(TimeTable) {
 async function getAllTeachersIds(schoolId, page = 1) {
   let teachersPageUrl = `https://schools.madrasati.sa/SchoolManagment/Teachers?SchoolId=${schoolId}`;
   if (page > 1) {
-    teachersPageUrl += `&PageNumber=${page}`;
+    teachersPageUrl += `&Page=${page}`;
   }
 
   console.log(`Fetching teachers data from page ${page}...`);
