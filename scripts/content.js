@@ -126,6 +126,7 @@ async function getLessonAndGoalsIds(data) {
       }
     }
   }
+  return null
 }
 
 async function getGoalsText(lessonAndGoalsIds) {
@@ -164,6 +165,7 @@ async function getGoalsText(lessonAndGoalsIds) {
     return goalsText;
   } catch (error) {
     console.log(error);
+    return null
   }
 }
 
@@ -206,7 +208,7 @@ function combineLessonContent(data) {
 
         const existingEntry = uniqueEntries.get(key);
         existingEntry.goals = [
-          ...new Set([...existingEntry.goals, ...entry.processedResult.goals]),
+          ...new Set([...existingEntry.goals, ...(entry.processedResult.goals ?? [])]),
         ];
         existingEntry.homeworks =
           existingEntry.homeworks || entry.processedResult.homeworks;
